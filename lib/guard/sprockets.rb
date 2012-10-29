@@ -2,7 +2,6 @@ require 'guard'
 require 'guard/guard'
 
 require 'sprockets'
-require 'execjs'
 
 module Guard
   class Sprockets < Guard
@@ -63,14 +62,15 @@ module Guard
 
       @sprockets.append_path(path.dirname) unless @sprockets.paths.include?(path.dirname)
 
+      output_filename = without_preprocessor_extension(path.basename.to_s)
       if File.extname(@destination)
-        #destination is a file
-        output_path = @destination
+        output_path = Pathname.new(@destination)
+        UI.debug "Guard::Sprockets (destination was a file)"
       else
-        output_filename = without_preprocessor_extension(path.basename.to_s)
         output_path = Pathname.new(File.join(@destination, output_filename))
       end
 
+      UI.debug "Guard::Sprockets.output_path = #{output_path}"
       UI.info "Sprockets will compile #{output_filename}"
 
       FileUtils.mkdir_p(output_path.parent) unless output_path.parent.exist?
@@ -80,10 +80,10 @@ module Guard
 
       UI.info "Sprockets compiled #{output_filename}"
       Notifier.notify "Sprockets compiled #{output_filename}"
-    rescue ExecJS::ProgramError => ex
+    rescue Exception => ex
       UI.error "Sprockets failed compiling #{output_filename}"
       UI.error ex.message
-      Notifier.notify "Sprockets failed compiling #{output_filename}!", :priority => 2, :image => :failed
+      Notifier.notify "Sprockets #{output_filename}: #{ex.message}", :priority => 2, :image => :failed
 
       false
     end
