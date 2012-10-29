@@ -63,8 +63,13 @@ module Guard
 
       @sprockets.append_path(path.dirname) unless @sprockets.paths.include?(path.dirname)
 
-      output_filename = without_preprocessor_extension(path.basename.to_s)
-      output_path = Pathname.new(File.join(@destination, output_filename))
+      if File.extname(@destination)
+        #destination is a file
+        output_path = @destination
+      else
+        output_filename = without_preprocessor_extension(path.basename.to_s)
+        output_path = Pathname.new(File.join(@destination, output_filename))
+      end
 
       UI.info "Sprockets will compile #{output_filename}"
 
