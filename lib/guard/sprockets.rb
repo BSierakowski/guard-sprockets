@@ -79,7 +79,9 @@ module Guard
       end
 
       UI.info "Sprockets compiled #{output_filename}"
-      Notifier.notify "Sprockets compiled #{output_filename}"
+      unless @options[:failure_only]
+        Notifier.notify "Sprockets compiled #{output_filename}"
+      end
     rescue Exception => ex
       UI.error "Sprockets failed compiling #{output_filename}"
       UI.error ex.message
